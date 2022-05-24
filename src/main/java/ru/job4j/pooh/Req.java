@@ -12,11 +12,11 @@ import java.util.Map;
  */
 
 public class Req {
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-    private static final String TOPIC = "topic";
-    private static final String QUEUE = "queue";
-    private static final String HTTP = "HTTP/1.1";
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public static final String TOPIC = "topic";
+    public static final String QUEUE = "queue";
+    public static final String HTTP = "HTTP/1.1";
 
     private final String httpRequestType;
     private final String poohMode;
