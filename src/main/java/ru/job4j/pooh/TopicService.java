@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentMap;
 
 public class TopicService implements Service {
 
-    private String lastId;
-
     private final ConcurrentMap<String,
             ConcurrentHashMap<String, ConcurrentLinkedQueue<String>>> queue = new ConcurrentHashMap<>();
 
@@ -16,16 +14,20 @@ public class TopicService implements Service {
         Resp resp;
         if (Req.GET.equals(req.httpRequestType())) {
             queue.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
-            queue.get(req.getSourceName()).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
-            lastId = req.getParam();
-            if (!queue.get(req.getSourceName()).get(lastId).isEmpty()) {
-                resp = new Resp(queue.get(req.getSourceName()).get(lastId).poll(), "200");
-            } else {
-                resp = new Resp("", "204");
-            }
+            var tmpGet = queue.get(req.getSourceName());
+            tmpGet.putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
+            var idUser = tmpGet.get(req.getParam());
+            resp = idUser == null || idUser.isEmpty()
+                    ? new Resp("", "204")
+                    : new Resp(idUser.poll(), "200");
         } else if (Req.POST.equals(req.httpRequestType())) {
-            queue.get(req.getSourceName()).get(lastId).offer(req.getParam());
-            resp = new Resp(req.getParam(), "200");
+            var tmpPost = queue.get(req.getSourceName());
+            if (tmpPost != null) {
+                tmpPost.values().forEach(el -> el.offer(req.getParam()));
+                resp = new Resp(req.getParam(), "200");
+            } else {
+                resp = new Resp("", "404");
+            }
         } else {
             resp = new Resp("", "501");
         }

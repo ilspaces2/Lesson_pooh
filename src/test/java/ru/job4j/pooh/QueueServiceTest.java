@@ -21,4 +21,28 @@ public class QueueServiceTest {
         );
         assertThat(result.text(), is("temperature=18"));
     }
+
+    @Test
+    public void whenPostThenGetQueueThenGetQueueAndQueueIsEmpty() {
+        QueueService queueService = new QueueService();
+        String paramForPostMethod = "temperature=18";
+        queueService.process(
+                new Req("POST", "queue", "weather", paramForPostMethod)
+        );
+        Resp getOne = queueService.process(
+                new Req("GET", "queue", "weather", null)
+        );
+        Resp getTwo = queueService.process(
+                new Req("GET", "queue", "weather", null)
+        );
+        assertThat(getOne.text(), is("temperature=18"));
+        assertThat(getTwo.text(), is(""));
+    }
+    @Test
+    public void whenGetQueueThenQueueIsAbsent() {
+        Resp result = new QueueService().process(
+                new Req("GET", "queue", "weather", null)
+        );
+        assertThat(result.text(), is(""));
+    }
 }

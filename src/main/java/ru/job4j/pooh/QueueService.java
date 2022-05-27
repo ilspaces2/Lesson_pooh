@@ -16,9 +16,10 @@ public class QueueService implements Service {
             queue.get(req.getSourceName()).offer(req.getParam());
             resp = new Resp(req.getParam(), "200");
         } else if (Req.GET.equals(req.httpRequestType())) {
-            resp = queue.get(req.getSourceName()).isEmpty()
+            var tmp = queue.get(req.getSourceName());
+            resp = tmp == null || tmp.isEmpty()
                     ? new Resp("", "204")
-                    : new Resp(queue.get(req.getSourceName()).poll(), "200");
+                    : new Resp(tmp.poll(), "200");
         } else {
             resp = new Resp("", "501");
         }

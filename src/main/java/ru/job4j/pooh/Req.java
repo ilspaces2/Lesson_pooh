@@ -1,8 +1,5 @@
 package ru.job4j.pooh;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Request - класс, служит для парсинга входящего запроса.
  * httpRequestType - GET или POST. Он указывает на тип запроса.
@@ -52,48 +49,15 @@ public class Req {
     }
 
     private static Req requestParser(String content) {
-        Map<String, String[]> map = validateReq(content);
-        String param = "";
-        if (GET.equals(map.get("startLine")[0]) && TOPIC.equals(map.get("url")[1])) {
-            param = map.get("url")[3];
-        } else if (POST.equals(map.get("startLine")[0])
-                && map.get("reqText")[map.get("reqText").length - 2].isBlank()) {
-            param = map.get("reqText")[map.get("reqText").length - 1];
-        }
-        return new Req(map.get("startLine")[0], map.get("url")[1],
-                map.get("url")[2], param);
-    }
-
-    /**
-     * <p>
-     * Проверка входного запроса :
-     * 1. если он пустой или меньше 3х строчек,
-     * 2. если ошибка в методе POST или GET или в типе протокла,
-     * 3. если неправильный режим,
-     * Тогда выбрасываем исключение.
-     * <p>
-     * Иначе возвращаем мапу с массивами :
-     * 1. всего контента,
-     * 2. первой строки,
-     * 3. url из первой строки.
-     */
-    private static Map<String, String[]> validateReq(String content) {
-        Map<String, String[]> map = new HashMap<>();
         String[] requestText = content.split(System.lineSeparator());
-        if (requestText[0].isBlank() || requestText.length < 3) {
-            throw new IllegalArgumentException("Request empty");
-        }
         String[] startLine = requestText[0].split(" ");
-        if ((!POST.equals(startLine[0]) && !GET.equals(startLine[0])) || !HTTP.equals(startLine[2])) {
-            throw new IllegalArgumentException("HttpRequest error");
-        }
         String[] url = startLine[1].split("/");
-        if (!TOPIC.equals(url[1]) && !QUEUE.equals(url[1])) {
-            throw new IllegalArgumentException("Mode error");
+        String param = "";
+        if (GET.equals(startLine[0]) && TOPIC.equals(url[1])) {
+            param = url[3];
+        } else if (POST.equals(startLine[0])) {
+            param = requestText[requestText.length - 1];
         }
-        map.put("reqText", requestText);
-        map.put("startLine", startLine);
-        map.put("url", url);
-        return Map.copyOf(map);
+        return new Req(startLine[0], url[1], url[2], param);
     }
 }
