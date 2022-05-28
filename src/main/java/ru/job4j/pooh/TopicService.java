@@ -11,7 +11,7 @@ public class TopicService implements Service {
 
     @Override
     public Resp process(Req req) {
-        Resp resp;
+        Resp resp = new Resp("", "501");
         if (Req.GET.equals(req.httpRequestType())) {
             queue.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
             var tmpGet = queue.get(req.getSourceName());
@@ -28,8 +28,6 @@ public class TopicService implements Service {
             } else {
                 resp = new Resp("", "404");
             }
-        } else {
-            resp = new Resp("", "501");
         }
         return resp;
     }
